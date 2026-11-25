@@ -33,15 +33,18 @@ Neste trabalho a gente explica, de forma visual e passo a passo, como funcionam 
 .
 ├── README.md
 ├── assets/
-│   └── capa.png                 capa do vídeo
-├── dijkstra/
-│   ├── Dijkstra.java            Dijkstra sobre matriz de custo (código do vídeo do Robson)
-│   └── labirinto/
-│       ├── Labirinto.java       Dijkstra e A* rodando no mesmo labirinto, com a comparação
-│       ├── mapa1.dat            mapa aberto, 25 x 17
-│       └── mapa2.dat            labirinto com paredes, 21 x 13 (o do vídeo)
-└── astar/
-    └── AEstrela.java            A* em grade (código do vídeo do Victor)
+│   └── capa.png                       capa do vídeo
+├── dijkstra/                          parte do Robson
+│   ├── Dijkstra.java                  Dijkstra sobre matriz de custo (código do vídeo)
+│   └── labirinto/                     labirinto do Dijkstra (gerado pela Marya com o Claude)
+│       ├── labirintos_e_comparativos.py   gera os mapas e calcula os dados da comparação
+│       └── LabirintoDijkstra.java         roda o Dijkstra.java no labirinto do vídeo
+└── astar/                             parte do Victor
+    ├── AEstrela.java                  A* em grade (código do vídeo)
+    └── labirinto/                     labirinto do A* (laboratório do A*)
+        ├── Labirinto.java             Dijkstra e A* no mesmo mapa, com a comparação
+        ├── mapa1.dat                  mapa aberto, 25 x 17
+        └── mapa2.dat                  labirinto com paredes, 21 x 13
 ```
 
 ## Composição do trabalho
@@ -53,7 +56,7 @@ O vídeo é dividido em quatro partes, e cada parte tem o seu código nesta orga
 | Abertura | Equipe | Apresentação dos três integrantes e do que cada um vai explicar | |
 | Dijkstra | Robson | O explorador sem bússola, o custo acumulado, a expansão em onda e o código em 4 trechos | `dijkstra/Dijkstra.java` |
 | A* | Victor | O explorador com bússola, a fórmula `f = g + h`, a distância de Manhattan e o código em trechos | `astar/AEstrela.java` |
-| Comparação | Marya | Os dois algoritmos no mesmo labirinto, lado a lado, com nós explorados e caminho encontrado | `dijkstra/labirinto/Labirinto.java` |
+| Comparação | Marya | Os dois algoritmos no mesmo labirinto, lado a lado, com nós explorados e caminho encontrado | `astar/labirinto/Labirinto.java` e `dijkstra/labirinto/labirintos_e_comparativos.py` |
 
 ## Dijkstra (`dijkstra/Dijkstra.java`)
 
@@ -75,9 +78,35 @@ O código tem dois métodos:
 
 Essa versão calcula a distância da origem para **todos** os vértices, sem parar ao chegar no destino.
 
-### O labirinto (`dijkstra/labirinto/`)
+### O labirinto do Dijkstra (`dijkstra/labirinto/`)
 
-Esta pasta guarda o que foi usado para montar o labirinto e comparar os dois algoritmos.
+Esta pasta guarda o que foi gerado para o labirinto do vídeo e para os dados da comparação. Foi feito pela Marya com o Claude.
+
+* **`labirintos_e_comparativos.py`** é o script em Python que:
+  * gera o labirinto com um *backtracker* recursivo (semente 52, 21 x 13) e quebra algumas paredes ao acaso para criar ciclos, ou seja, mais de um caminho possível;
+  * monta o mapa aberto com obstáculo (25 x 17) e os mapas das cenas do A*;
+  * roda Dijkstra e A* (o Dijkstra é o A* com `h = 0`) e imprime nós explorados e passos de cada um;
+  * guarda a ordem em que os nós foram explorados, que é o que anima o labirinto no vídeo.
+* **`LabirintoDijkstra.java`** roda o `Dijkstra.java` no labirinto do vídeo. Cada quadrado livre vira um vértice, o custo entre vizinhos é 1 e o resto da matriz é `INF`. Imprime o caminho e o número de passos (72).
+
+A semente 52 foi escolhida testando as sementes de 0 a 199: o A* explora entre 80% e 95% dos nós do Dijkstra e o caminho tem pelo menos 40 passos.
+
+## A* (`astar/AEstrela.java`)
+
+A* em grade (0 = livre, 1 = parede). Foi o código usado na explicação do Victor.
+
+* A classe `No` guarda `linha`, `coluna`, `g`, `h`, `f` e o `pai`.
+* O custo de um passo reto é `RETO = 10` e o de uma diagonal é `DIAGONAL = 14`.
+* A heurística `h` é a distância de Manhattan até o destino, multiplicada por `RETO`.
+* Funcionamento, em três partes principais:
+  1. **Escolhe** na lista aberta o quadrado de menor `f`.
+  2. **Olha os 8 vizinhos**, ignorando o que está fora do mapa, as paredes e os quadrados já fechados, e calcula o `novoG`.
+  3. **Atualiza:** se o vizinho é novo, entra na lista aberta com `g`, `h` e `f`. Se já estava, só é atualizado quando o novo caminho é melhor (troca o pai e atualiza `g` e `f`).
+* Ao chegar no destino, segue os pais de trás para frente para montar o caminho.
+
+### O labirinto do A* (`astar/labirinto/`)
+
+Esta pasta guarda o laboratório do A*, com o código que compara os dois algoritmos e os mapas.
 
 * **`Labirinto.java`** lê um arquivo `.dat`, roda o Dijkstra e o A* no mesmo mapa e imprime passos, quadrados visitados e tempo de cada um, além de desenhar o caminho.
 * **`mapa1.dat`** e **`mapa2.dat`** são os mapas.
@@ -103,22 +132,9 @@ Como o `Labirinto.java` funciona:
 * A heurística `h` é a menor distância de Manhattan até alguma das saídas.
 * Conta quantos quadrados foram visitados e mede o tempo de cada algoritmo. Antes da medição, roda os dois 200 vezes para a JVM "esquentar" e o tempo ficar justo.
 
-## A* (`astar/AEstrela.java`)
-
-A* em grade (0 = livre, 1 = parede). Foi o código usado na explicação do Victor.
-
-* A classe `No` guarda `linha`, `coluna`, `g`, `h`, `f` e o `pai`.
-* O custo de um passo reto é `RETO = 10` e o de uma diagonal é `DIAGONAL = 14`.
-* A heurística `h` é a distância de Manhattan até o destino, multiplicada por `RETO`.
-* Funcionamento, em três partes principais:
-  1. **Escolhe** na lista aberta o quadrado de menor `f`.
-  2. **Olha os 8 vizinhos**, ignorando o que está fora do mapa, as paredes e os quadrados já fechados, e calcula o `novoG`.
-  3. **Atualiza:** se o vizinho é novo, entra na lista aberta com `g`, `h` e `f`. Se já estava, só é atualizado quando o novo caminho é melhor (troca o pai e atualiza `g` e `f`).
-* Ao chegar no destino, segue os pais de trás para frente para montar o caminho.
-
 ## Resultados
 
-Rodando o `Labirinto.java` (4 direções, custo 1 por passo):
+Rodando o `astar/labirinto/Labirinto.java` (4 direções, custo 1 por passo):
 
 | Mapa | Algoritmo | Passos | Quadrados visitados |
 | --- | --- | --- | --- |
@@ -133,22 +149,26 @@ O tempo também é impresso pelo programa, mas varia de máquina para máquina e
 
 ## Como compilar e executar
 
-Requisito: JDK instalado.
+Requisito: JDK instalado (e Python 3 para o script de mapas).
 
 ```bash
-# Dijkstra e A* no labirinto, com a comparação
-cd dijkstra/labirinto
+# Dijkstra e A* no mesmo mapa, com a comparação
+cd astar/labirinto
 javac Labirinto.java
 java Labirinto mapa2.dat      # ou mapa1.dat
 
 # A* em grade (exemplo próprio dentro do arquivo)
-cd ../../astar
+cd ../
 javac AEstrela.java
 java AEstrela
 
-# Dijkstra sobre matriz de custo (classe com os métodos buscar e caminho)
-cd ../dijkstra
-javac Dijkstra.java
+# Dijkstra sobre matriz de custo, rodando no labirinto do vídeo
+cd ../dijkstra/labirinto
+javac -d out ../Dijkstra.java LabirintoDijkstra.java
+java -cp out LabirintoDijkstra
+
+# gera os mapas e os dados da comparação
+python3 labirintos_e_comparativos.py
 ```
 
 Se nenhum arquivo for informado, o `Labirinto` procura por `labirinto.dat`.
