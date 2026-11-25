@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="assets/capa.png" alt="Dijkstra vs A*: qual algoritmo acha o menor caminho?" width="100%">
+  <a href="https://www.youtube.com/watch?v=giB7X_QCtPM">
+    <img src="assets/capa.png" alt="Dijkstra vs A*: qual algoritmo acha o menor caminho? Clique para assistir no YouTube" width="100%">
+  </a>
 </p>
 
 # Dijkstra vs A*: qual algoritmo acha o menor caminho?
@@ -11,7 +13,7 @@ Neste trabalho a gente explica, de forma visual e passo a passo, como funcionam 
 * O **Dijkstra** é o explorador sem bússola: ele guarda quanto já andou desde a entrada (o custo `g`) e se espalha para todos os lados, como uma onda.
 * O **A\*** é o explorador com bússola: além do custo `g`, ele usa uma estimativa do que ainda falta (a heurística `h`) e escolhe sempre o quadrado de menor `f = g + h`.
 
-Vídeo no YouTube: (adicionar o link depois da publicação)
+### 🎬 Assista ao vídeo: [Dijkstra vs A* no YouTube](https://www.youtube.com/watch?v=giB7X_QCtPM)
 
 ## Equipe
 
